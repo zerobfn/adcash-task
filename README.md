@@ -1,4 +1,4 @@
-# adcach-task
+# adcash-task
 
 ## Project setup
 ```
