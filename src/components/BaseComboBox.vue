@@ -19,7 +19,7 @@
                         class="input_field"
                         autocomplete="off"
                         @keyup.enter="addNewItem()"
-                        v-on:input="focusToInput()"
+                        v-on:input="isDropdownVisible = true"
                         :placeholder="freeEntry ? 'Enter rules' : 'Select rules'"
                         v-model="inputValue"
                     />
@@ -105,11 +105,8 @@ export default {
         removeItem(item) {
             this.$emit('removeItem', item)
         },
-        focusToInput() {
-            this.$refs.inputField.focus()
-            this.isDropdownVisible = true
-        },
         toggleDropdown() {
+            this.$refs.inputField.focus()
             this.isDropdownVisible = !this.isDropdownVisible
         },
         closeDropdown() {
@@ -149,6 +146,7 @@ input:focus {
                 .input_field {
                     min-width: 120px;
                     width: 100%;
+                    padding: 2px;
                     font-style: normal;
                     font-weight: normal;
                     font-size: 14px;

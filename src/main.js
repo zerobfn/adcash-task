@@ -14,6 +14,9 @@ Vue.component('base-select-box', BaseSelectBox)
 import BaseComboBox from '@/components/BaseComboBox.vue'
 Vue.component('base-combo-box', BaseComboBox)
 
+import BaseButton from '@/components/BaseButton.vue'
+Vue.component('base-button', BaseButton)
+
 Vue.config.productionTip = false
 
 new Vue({
