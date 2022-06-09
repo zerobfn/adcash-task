@@ -7,10 +7,12 @@ export class RuleCollection {
 }
 
 export class TargetingRule {
-    constructor(id, ruleId, targetingTypeId, saved) {
+    constructor(id, ruleId, name, targetingTypeId, saved, deleted) {
         this.id = id
         this.ruleId = ruleId
+        this.name = name
         this.targetingTypeId = targetingTypeId
         this.saved = saved
+        this.deleted = deleted
     }
 }

@@ -1,7 +1,11 @@
 <template>
     <div class="BaseRule">
         {{ text }}
-        <div class="close" @click="removeItem()"></div>
+        <div class="close" @click="removeItem()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 5.00014L19 19M19 5L5 18.9999" stroke="#1C1C1C" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
     </div>
 </template>
 
@@ -37,24 +41,9 @@ export default {
     background: #E0E2D8;
     .close {
         position: relative;
-        margin: 4px 2px;
-        width: 12px;
-        height: 12px;
-        &::before, &::after {
-            content: '';
-            position: absolute;
-            left: 7px;
-            height: 12px;
-            width: 2px;
-            background: #1c1c1c;
-            border-radius: 5px;
-        }
-        &::after {
-            transform: rotate(45deg);
-        }
-        &::before {
-            transform: rotate(-45deg);
-        }
+        margin: 2px;
+        width: 16px;
+        height: 16px;
         &:hover {
             cursor: pointer;
         }

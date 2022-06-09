@@ -10,7 +10,7 @@
                 <BaseRule
                     v-for="rule in selectedRules"
                     :text="rule.name"
-                    @removeItem="1"
+                    @removeItem="removeItem(rule.id)"
                     :key="`${JSON.stringify(rule)}`"
                 />
                 <div class="input_field_container">
@@ -20,6 +20,7 @@
                         autocomplete="off"
                         @keyup.enter="addNewItem()"
                         v-on:input="focusToInput()"
+                        :placeholder="freeEntry ? 'Enter rules' : 'Select rules'"
                         v-model="inputValue"
                     />
                 </div>
@@ -38,6 +39,9 @@
             >
                 {{item.name}}
             </div>
+            <p v-if="getItems.length === 0">
+                There are no possible rules
+            </p>
         </div>
     </div>
 </template>
@@ -79,7 +83,7 @@ export default {
         getItems() {
             return this.dropdownItems.filter(x => {
                 if (!this.selectedRules.find(y => y.ruleId == x.id)) {
-                    return x.name.includes(this.inputValue)
+                    return x.name.toLowerCase().includes(this.inputValue.toLowerCase())
                 } else return false
             })
         }
@@ -87,20 +91,26 @@ export default {
     methods: {
         addNewItem() {
             if (this.inputValue && this.freeEntry) {
-                // TODO
+                this.$emit('onSelectItem', {
+                    id: this.inputValue,
+                    name: this.inputValue
+                })
+                this.inputValue = ''
             }
         },
         selectItem(item) {
             this.$emit('onSelectItem', item)
+            this.inputValue = ''
+        },
+        removeItem(item) {
+            this.$emit('removeItem', item)
         },
         focusToInput() {
             this.$refs.inputField.focus()
             this.isDropdownVisible = true
         },
         toggleDropdown() {
-            if (this.dropdownItems.length > 0) {
-                this.isDropdownVisible = !this.isDropdownVisible
-            }
+            this.isDropdownVisible = !this.isDropdownVisible
         },
         closeDropdown() {
             this.isDropdownVisible = false

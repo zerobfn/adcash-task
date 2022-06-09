@@ -9,93 +9,116 @@ export default new Vuex.Store({
     state: {
         targetingTypes: [], // static data of targeting types
         selectedTargetingType: undefined, // currect selected targeting type
-        listOfRuleCollection: [], // static data of list rule collection
-        rulesCollection: [] // added rules collection
+        ruleCollections: [], // static data of list rule collection
+        savedRules: [], // saved rules collection
+        downloaded: { // checker for all collections downloaded
+            cateogoryCollection: false,
+            countryCollection: false,
+            deviceCollection: false
+        }
     },
     actions: {
         // fetching All Targeting types
-        fetchListAllTargetingTypes() {
+        fetchListAllTargetingTypes({ commit, dispatch }) {
             httpGet({
                 url: 'https://private-anon-34cadab3c9-adcashdsp.apiary-mock.com/types',
                 onSuccess: json => {
-                    this.commit('setTargetingTypes', json)
+                    commit('setTargetingTypes', json)
                     if (json.length > 0) {
-                        this.commit('setSelectedTargetingType', json[0])
+                        commit('setSelectedTargetingType', json[0])
                     }
                 },
                 onError: error => {
                     console.error(error)
                 },
                 doFinally: () => {
-                    this.dispatch('fetchCategoryCollection')
-                    this.dispatch('fetchCountryCollection')
-                    this.dispatch('fetchDeviceCollection')
-                    this.dispatch('addUrlKeywordsCollection')
-                    this.dispatch('fetchRulesCollection')
+                    dispatch('fetchCategoryCollection')
+                    dispatch('fetchCountryCollection')
+                    dispatch('fetchDeviceCollection')
+                    dispatch('addUrlKeywordsCollection')
                 }
             })
         },
         // fetching list all category targeting types
-        fetchCategoryCollection() {
+        fetchCategoryCollection({ state, commit, dispatch }) {
+            state.downloaded.cateogoryCollection = false
             httpGet({
                 url: 'https://private-anon-34cadab3c9-adcashdsp.apiary-mock.com/categories',
                 onSuccess: json => {
-                    this.commit('addRuleCollection', new RuleCollection(1, json, false))
-                },
-                onError: error => {
-                    console.error(error)
-                }
-            })
-        },
-        // fetching list all country targeting types
-        fetchCountryCollection() {
-            httpGet({
-                url: 'https://private-anon-34cadab3c9-adcashdsp.apiary-mock.com/countries',
-                onSuccess: json => {
-                    this.commit('addRuleCollection', new RuleCollection(2, json, false))
-                },
-                onError: error => {
-                    console.error(error)
-                }
-            })
-        },
-        // fetching list all device targeting types
-        fetchDeviceCollection() {
-            httpGet({
-                url: 'https://private-anon-34cadab3c9-adcashdsp.apiary-mock.com/devices',
-                onSuccess: json => {
-                    this.commit('addRuleCollection', new RuleCollection(3, json, false))
-                },
-                onError: error => {
-                    console.error(error)
-                }
-            })
-        },
-        // addting url keywords collection to listOfRuleCollection
-        addUrlKeywordsCollection() {
-            this.commit('addRuleCollection', new RuleCollection(4, [], true))
-        },
-        // fetching existing rules collection
-        fetchRulesCollection() {
-            httpGet({
-                url: 'https://private-anon-34cadab3c9-adcashdsp.apiary-mock.com/rules',
-                onSuccess: json => {
-                    json.forEach(x => {
-                        this.commit('addTargetingRule', {
-                            id: x.id,
-                            ruleId: x.rule,
-                            targetingTypeId: x.targeting_type_id,
-                            saved: true
-                        })
-                    })
+                    commit('addRuleCollection', new RuleCollection(1, json, false))
                 },
                 onError: error => {
                     console.error(error)
                 },
                 doFinally: () => {
-                    // TODO
+                    state.downloaded.cateogoryCollection = true
+                    dispatch('fetchRulesCollection')
                 }
             })
+        },
+        // fetching list all country targeting types
+        fetchCountryCollection({ state, commit, dispatch }) {
+            state.downloaded.countryCollection = false
+            httpGet({
+                url: 'https://private-anon-34cadab3c9-adcashdsp.apiary-mock.com/countries',
+                onSuccess: json => {
+                    commit('addRuleCollection', new RuleCollection(2, json, false))
+                },
+                onError: error => {
+                    console.error(error)
+                },
+                doFinally: () => {
+                    state.downloaded.countryCollection = true
+                    dispatch('fetchRulesCollection')
+                }
+            })
+        },
+        // fetching list all device targeting types
+        fetchDeviceCollection({ state, commit, dispatch }) {
+            state.downloaded.deviceCollection = false
+            httpGet({
+                url: 'https://private-anon-34cadab3c9-adcashdsp.apiary-mock.com/devices',
+                onSuccess: json => {
+                    commit('addRuleCollection', new RuleCollection(3, json, false))
+                },
+                onError: error => {
+                    console.error(error)
+                },
+                doFinally: () => {
+                    state.downloaded.deviceCollection =  true
+                    dispatch('fetchRulesCollection')
+                }
+            })
+        },
+        // addting url keywords collection to ruleCollections
+        addUrlKeywordsCollection({ commit }) {
+            commit('addRuleCollection', new RuleCollection(4, [], true))
+        },
+        // fetching existing rules collection
+        fetchRulesCollection({ state, getters, commit }) {
+            if (state.downloaded.cateogoryCollection
+                && state.downloaded.countryCollection
+                && state.downloaded.deviceCollection) {
+                httpGet({
+                    url: 'https://private-anon-34cadab3c9-adcashdsp.apiary-mock.com/rules',
+                    onSuccess: json => {
+                        json.forEach(x => {
+                            const rule = getters.getTargetingTypeRules(x.targeting_type_id).find(y => y.id == x.rule)
+                            commit('addTargetingRule', {
+                                id: x.id,
+                                ruleId: x.rule,
+                                name: rule ? rule.name : x.rule,
+                                targetingTypeId: x.targeting_type_id,
+                                saved: true,
+                                deleted: false
+                            })
+                        })
+                    },
+                    onError: error => {
+                        console.error(error)
+                    }
+                })
+            }
         }
     },
     mutations: {
@@ -109,18 +132,18 @@ export default new Vuex.Store({
         },
         // adding targeting type rule collection
         addRuleCollection(state, collection) {
-            const index = state.listOfRuleCollection.findIndex(x => x.targetingTypeId === collection.id)
+            const index = state.ruleCollections.findIndex(x => x.targetingTypeId === collection.targetingTypeId)
             if (index === -1) {
-                state.listOfRuleCollection.push(collection)
+                state.ruleCollections.push(collection)
             }
         },
         // adding targeting rule
-        addTargetingRule(state, {id, ruleId, targetingTypeId, saved}) {
-            const index = state.rulesCollection.findIndex(x => {
-                return x.ruleId == ruleId && x.targetingTypeId === targetingTypeId
+        addTargetingRule(state, {id, ruleId, name, targetingTypeId, saved, deleted}) {
+            const index = state.savedRules.findIndex(x => {
+                return x.ruleId == ruleId && x.targetingTypeId == targetingTypeId
             })
             if (index === -1) {
-                state.rulesCollection.push(new TargetingRule(id, ruleId, targetingTypeId, saved))
+                state.savedRules.push(new TargetingRule(id, ruleId, name, targetingTypeId, saved, deleted))
             }
         }
     },
@@ -135,49 +158,54 @@ export default new Vuex.Store({
         },
         // getting selected targeting type id
         getSelectedTargetingTypeId(_state, getters) {
-            return getters.getSelectedTargetingType ? getters.getSelectedTargetingType.id : 0
+            return getters.getSelectedTargetingType ? getters.getSelectedTargetingType.id : -1
         },
         // getting selected targeting type name
         getSelectedTargetingTypeName(_state, getters) {
             return getters.getSelectedTargetingType ? getters.getSelectedTargetingType.name : ''
         },
         // getting selected or specific targeting type rule collection
-        getSelectedTargetTypeRuleCollection: (state) => (typeId) => {
-            if (state.selectedTargetingType) {
-                const targetType = state.listOfRuleCollection.find(x => {
-                    if (typeId) {
-                        return x.targetingTypeId === state.selectedTargetingType.id
-                    } else {
-                        return x.targetingTypeId === state.selectedTargetingType.id
-                    }
-                })
-                return targetType
-            } else return undefined
+        getTargetingTypeRuleCollection: (state, getters) => (typeId) => {
+            return state.ruleCollections.find(x => {
+                if (typeId) {
+                    return x.targetingTypeId === typeId
+                } else {
+                    return x.targetingTypeId === getters.getSelectedTargetingTypeId
+                }
+            })
         },
-        // getting selected targeting type free entry options
-        getTargetTypeFreeEntry(_state, getters) {
-            const targetType = getters.getSelectedTargetTypeRuleCollection
+        // getting selected or specific targeting type free entry options
+        getTargetingTypeFreeEntry: (_state, getters) => (typeId) => {
+            const targetType = getters.getTargetingTypeRuleCollection(typeId)
             return targetType ? targetType.freeEntry : false
         },
-        // getting selected targeting type rules list
-        getTargetTypeRules:(_state, getters) => (typeId) => {
-            const targetType = getters.getSelectedTargetTypeRuleCollection(typeId)
+        // getting selected or specific targeting type rules list
+        getTargetingTypeRules:(_state, getters) => (typeId) => {
+            const targetType = getters.getTargetingTypeRuleCollection(typeId)
             return targetType ? targetType.list : []
         },
         // getting selected target rules of specific or selectedTargetingType
         getSelectedTargetRules: (state, getters) => (typeId) => {
-            const rules = getters.getTargetTypeRules(typeId)
-            return state.rulesCollection.filter(x => {
-                if (typeId) {
-                    return x.targetingTypeId === typeId
-                } else if (state.selectedTargetingType) {
-                    return x.targetingTypeId === state.selectedTargetingType.id
-                } else return false
-            }).map(x => {
-                const rule = rules.find(y => y.id == x.ruleId)
-                x.name = rule ? rule.name : ''
-                return x
-            }).filter(x => x.name)
+            state.ruleCollections
+            getters
+            typeId
+            return []
+            // const rules = getters.getTargetTypeRules(typeId)
+            // return state.rulesCollection.filter(x => {
+            //     if (typeId) {
+            //         return x.targetingTypeId === typeId
+            //     } else if (state.selectedTargetingType) {
+            //         return x.targetingTypeId === state.selectedTargetingType.id
+            //     } else return false
+            // }).map(x => {
+            //     const rule = rules.find(y => y.id == x.ruleId)
+            //     x.name = rule ? rule.name : ''
+            //     return x
+            // }).filter(x => x.name)
+        },
+        // getting saved rules
+        getSavedRules(state) {
+            return state.savedRules
         }
     },
     modules: {
