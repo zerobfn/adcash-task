@@ -43,7 +43,6 @@ export default {
         getTableData() {
             const targetingTypes = this.$store.getters.getTargetingTypes
             const rules = this.$store.getters.getSavedRules
-            console.log('getableData')
             return targetingTypes.map(x => {
                 return {
                     type: x,

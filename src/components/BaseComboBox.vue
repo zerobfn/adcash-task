@@ -74,11 +74,6 @@ export default {
             inputValue: ''
         }
     },
-    watch: {
-        selectedItems() {
-            console.log(this.selectedItems)
-        }
-    },
     computed: {
         getItems() {
             return this.dropdownItems.filter(x => {

@@ -34,7 +34,7 @@ export const httpPost = ({
     fetch(url, {
         method: 'POST',
         headers,
-        stringifiedJson
+        body: stringifiedJson
     }).then(response => response.json())
     .then(json => {
         onSuccess(json)
@@ -47,6 +47,7 @@ export const httpPost = ({
 
 export const httpDelete = ({
     url,
+    body,
     onSuccess,
     onError,
     doFinally
@@ -54,9 +55,11 @@ export const httpDelete = ({
     const headers = {
         'Content-Type': 'application/json'
     }
+    const stringifiedJson = body ? JSON.stringify(body) : null
     fetch(url, {
         method: 'DELETE',
-        headers
+        headers,
+        body: stringifiedJson
     }).then(response => response.json())
     .then(json => {
         if (onSuccess) onSuccess(json)
