@@ -140,10 +140,24 @@ export default new Vuex.Store({
         // adding targeting rule
         addTargetingRule(state, {id, ruleId, name, targetingTypeId, saved, deleted}) {
             const index = state.savedRules.findIndex(x => {
-                return x.ruleId == ruleId && x.targetingTypeId == targetingTypeId
+                return x.ruleId == ruleId && x.targetingTypeId == targetingTypeId && x.name == name
             })
-            if (index === -1) {
+            if (index !== -1) {
+                if (state.savedRules[index].deleted) {
+                    state.savedRules[index].deleted = false
+                }
+            } else {
                 state.savedRules.push(new TargetingRule(id, ruleId, name, targetingTypeId, saved, deleted))
+            }
+        },
+        // deleting targeting rule
+        // if it is not saved in the database it remove from array, else prepare for delete by API
+        deleteTargetingRule(state, rule) {
+            const index = state.savedRules.findIndex(x => x.ruleId == rule.ruleId)
+            if (rule.id === null) {
+                state.savedRules.splice(index, 1)
+            } else {
+                state.savedRules[index].deleted = true
             }
         }
     },
@@ -183,25 +197,6 @@ export default new Vuex.Store({
         getTargetingTypeRules:(_state, getters) => (typeId) => {
             const targetType = getters.getTargetingTypeRuleCollection(typeId)
             return targetType ? targetType.list : []
-        },
-        // getting selected target rules of specific or selectedTargetingType
-        getSelectedTargetRules: (state, getters) => (typeId) => {
-            state.ruleCollections
-            getters
-            typeId
-            return []
-            // const rules = getters.getTargetTypeRules(typeId)
-            // return state.rulesCollection.filter(x => {
-            //     if (typeId) {
-            //         return x.targetingTypeId === typeId
-            //     } else if (state.selectedTargetingType) {
-            //         return x.targetingTypeId === state.selectedTargetingType.id
-            //     } else return false
-            // }).map(x => {
-            //     const rule = rules.find(y => y.id == x.ruleId)
-            //     x.name = rule ? rule.name : ''
-            //     return x
-            // }).filter(x => x.name)
         },
         // getting saved rules
         getSavedRules(state) {

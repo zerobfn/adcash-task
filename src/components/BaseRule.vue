@@ -30,6 +30,7 @@ export default {
 .BaseRule {
     display: flex;
     flex-wrap: nowrap;
+    width: fit-content;
     padding: 2px 4px;
     border-radius: 8px;
     margin: 2px 4px 2px 0;

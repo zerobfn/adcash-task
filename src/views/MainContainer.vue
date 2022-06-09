@@ -3,6 +3,9 @@
         <h1>Ad Targeting</h1>
         <RuleAdding />
         <SavedRules class="MainContainer_rules"/>
+        <base-button class="MainContainer_saveButton">
+            Save changes
+        </base-button>
     </div>
 </template>
 
@@ -34,6 +37,8 @@ export default {
 
 <style lang="scss" scoped>
 .MainContainer {
+    display: flex;
+    flex-direction: column;
     flex-grow: 1;
     max-width: min(90%, 800px);
     min-height: 500px;
@@ -41,6 +46,10 @@ export default {
     border: 2px dashed orange;
     &_rules {
         margin-top: 32px;
+    }
+    &_saveButton {
+        margin-top: 24px;
+        margin-left: auto;
     }
 }
 

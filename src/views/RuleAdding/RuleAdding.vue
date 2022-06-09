@@ -60,7 +60,7 @@ export default {
         onSelectRule(rule) {
             const savedRules = this.$store.getters.getSavedRules
             const typeId = this.$store.getters.getSelectedTargetingTypeId
-            if (!savedRules.find(x => x.targetingTypeId == typeId && x.ruleId == rule.id)
+            if (!savedRules.find(x => x.targetingTypeId == typeId && x.ruleId == rule.id && !x.deleted)
                 && !this.selectedRules.find(x => x.ruleId == rule.id)) {
                 this.selectedRules.push({
                     id: null,
