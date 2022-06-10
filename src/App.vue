@@ -1,16 +1,19 @@
 <template>
     <div id="app">
+        <LoadingModel />
         <MainContainer />
     </div>
 </template>
 
 <script>
 import MainContainer from '@/views/MainContainer.vue'
+import LoadingModel from '@/views/LoadingModel/LoadingModel.vue'
 
 export default {
     name: 'App',
     components: {
-        MainContainer
+        MainContainer,
+        LoadingModel
     },
     computed: {
         test() {
@@ -24,7 +27,7 @@ export default {
 
 <style lang="scss">
 #app {
-    margin-top: 60px;
+    margin: 32px 0;
     display: flex;
     justify-content: center;
 }

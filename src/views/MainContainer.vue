@@ -47,9 +47,7 @@ export default {
                     group[targetingTypeId].push(rule)
                     return group
                 }, {})
-                console.log(deletedRules)
                 for (const [type, rules] of Object.entries(deletedRules)) {
-                    console.log('here')
                     this.$store.dispatch('deleteTargetingRules', {
                         targeting_type_id: type,
                         rules: rules.map(x => x.id)

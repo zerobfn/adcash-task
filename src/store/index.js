@@ -16,12 +16,12 @@ export default new Vuex.Store({
             countryCollection: false,
             deviceCollection: false
         },
-        loading: 0
+        loadingCount: 0 // counts active fetch number
     },
     actions: {
         // fetching All Targeting types
         fetchListAllTargetingTypes({state, commit, dispatch }) {
-            state.loading++
+            state.loadingCount++
             httpGet({
                 url: 'https://private-anon-34cadab3c9-adcashdsp.apiary-mock.com/types',
                 onSuccess: json => {
@@ -38,14 +38,14 @@ export default new Vuex.Store({
                     dispatch('fetchCountryCollection')
                     dispatch('fetchDeviceCollection')
                     dispatch('addUrlKeywordsCollection')
-                    state.loading--
+                    state.loadingCount--
                 }
             })
         },
         // fetching list all category targeting types
         fetchCategoryCollection({ state, commit, dispatch }) {
             state.downloaded.cateogoryCollection = false
-            state.loading++
+            state.loadingCount++
             httpGet({
                 url: 'https://private-anon-34cadab3c9-adcashdsp.apiary-mock.com/categories',
                 onSuccess: json => {
@@ -57,14 +57,14 @@ export default new Vuex.Store({
                 doFinally: () => {
                     state.downloaded.cateogoryCollection = true
                     dispatch('fetchRulesCollection')
-                    state.loading--
+                    state.loadingCount--
                 }
             })
         },
         // fetching list all country targeting types
         fetchCountryCollection({ state, commit, dispatch }) {
             state.downloaded.countryCollection = false
-            state.loading++
+            state.loadingCount++
             httpGet({
                 url: 'https://private-anon-34cadab3c9-adcashdsp.apiary-mock.com/countries',
                 onSuccess: json => {
@@ -76,14 +76,14 @@ export default new Vuex.Store({
                 doFinally: () => {
                     state.downloaded.countryCollection = true
                     dispatch('fetchRulesCollection')
-                    state.loading--
+                    state.loadingCount--
                 }
             })
         },
         // fetching list all device targeting types
         fetchDeviceCollection({ state, commit, dispatch }) {
             state.downloaded.deviceCollection = false
-            state.loading++
+            state.loadingCount++
             httpGet({
                 url: 'https://private-anon-34cadab3c9-adcashdsp.apiary-mock.com/devices',
                 onSuccess: json => {
@@ -95,7 +95,7 @@ export default new Vuex.Store({
                 doFinally: () => {
                     state.downloaded.deviceCollection =  true
                     dispatch('fetchRulesCollection')
-                    state.loading--
+                    state.loadingCount--
                 }
             })
         },
@@ -108,7 +108,7 @@ export default new Vuex.Store({
             if (state.downloaded.cateogoryCollection
                 && state.downloaded.countryCollection
                 && state.downloaded.deviceCollection) {
-                state.loading++
+                state.loadingCount++
                 httpGet({
                     url: 'https://private-anon-34cadab3c9-adcashdsp.apiary-mock.com/rules',
                     onSuccess: json => {
@@ -128,14 +128,14 @@ export default new Vuex.Store({
                         console.error(error)
                     },
                     doFinally: () => {
-                        state.loading--
+                        state.loadingCount--
                     }
                 })
             }
         },
         // deleting targeting rules
         deleteTargetingRules({ state, dispatch }, deleteBody) {
-            state.loading++
+            state.loadingCount++
             httpDelete({
                 url: 'https://private-anon-34cadab3c9-adcashdsp.apiary-mock.com/rules',
                 body: deleteBody,
@@ -155,14 +155,14 @@ export default new Vuex.Store({
                     console.error(error)
                 },
                 doFinally: () => {
-                    state.loading--
+                    state.loadingCount--
                     dispatch('logSavedRules')
                 }
             })
         },
         // adding new targeting rules
         addNewTargetingRules({ state, dispatch }, postBody) {
-            state.loading++
+            state.loadingCount++
             httpPost({
                 url: 'https://private-anon-34cadab3c9-adcashdsp.apiary-mock.com/rules',
                 body: postBody,
@@ -183,16 +183,14 @@ export default new Vuex.Store({
                     console.error(error)
                 },
                 doFinally: () => {
-                    state.loading--
+                    state.loadingCount--
                     dispatch('logSavedRules')
                 }
             })
         },
         // loging saved rules
         logSavedRules({ state }) {
-            console.log('here')
-            if (state.loading === 0) {
-                console.log('logSavedRules')
+            if (state.loadingCount === 0) {
                 const rules = state.savedRules.map(x => {
                     return {
                         id: x.id,
@@ -200,7 +198,7 @@ export default new Vuex.Store({
                         rule: x.ruleId
                     }
                 })
-                console.log(rules)
+                console.log('saved rules', rules)
             }
         }
     },
@@ -291,6 +289,10 @@ export default new Vuex.Store({
         // getting saved rules
         getSavedRules(state) {
             return state.savedRules
+        },
+        // getting loading count
+        getLoadingCount(state) {
+            return state.loadingCount
         }
     },
     modules: {

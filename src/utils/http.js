@@ -65,7 +65,7 @@ export const httpDelete = ({
         if (onSuccess) onSuccess(json)
     }).catch(error => {
         if (onError) onError(error)
-    }).doFinally(() => {
+    }).finally(() => {
         if (doFinally) doFinally()
     })
 }
